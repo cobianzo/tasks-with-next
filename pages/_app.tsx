@@ -8,6 +8,12 @@ export interface TaskType {
   completed: boolean,
 }
 
+export interface TasksAPIType {
+  addNewTask: Function,
+  deleteTask: Function,
+  updateTask: Function,
+}
+
 function MyApp({ Component, pageProps }: AppProps) {
   
   const [tasks, setTasks] = React.useState<TaskType[]>([]);
@@ -20,7 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       }
       // get latest id from tasks
       if (tasks.length)
-        task.id = tasks.reduce( (acc, curr) => { curr > acc? curr : acc  } ) + 1;
+        task.id = tasks.reduce( (acc, curr) =>  curr.id > acc? curr.id : acc  , 0 ) + 1;
       else task.id = 1;
       setTasks( [...tasks, task]  );
     },
@@ -29,6 +35,19 @@ function MyApp({ Component, pageProps }: AppProps) {
       const taskExists = tasks.findIndex( tt => tt.id === taskId );
       if (taskExists >= 0 ) {
         const newTasks = tasks.filter( (theTask, index) => index !== taskExists );
+        setTasks(newTasks);
+      }
+    },
+
+    updateTask : function( taskId: number, taskFields: Object ):void {
+      const taskExists = tasks.findIndex( tt => tt.id === taskId );
+      if (taskExists >= 0 ) {
+        const newTasks = tasks.map( (theTask, index) => {
+          if (index === taskExists) {
+            theTask = { ...theTask, ...taskFields };
+          }
+          return theTask;
+        } );
         setTasks(newTasks);
       }
     }

@@ -5,14 +5,16 @@ import styles from '../styles/TaskItem.module.scss'
 import { VscPassFilled, VscPass } from 'react-icons/vsc';
 import { BsFillPencilFill } from 'react-icons/bs';
 import { FcCancel } from 'react-icons/fc';
+import TasksAPIType from '../pages/_app/TasksAPIType';
 
 type TaskProps = {
     task: TaskType,
     tasks: TaskType[],
+    tasksAPI: TasksAPIType,
     setTasks: Function,
 }
 
-export const TaskItem: React.FunctionComponent<TaskProps> = ( { task, tasksAPI, tasks, setTasks } ) => {
+export const TaskItem: React.FunctionComponent<TaskProps> = ( { task, tasksAPI } ) => {
 
     /** States */
     const [isEditing, setIsEditing] = React.useState<boolean|string>(false);
@@ -24,29 +26,24 @@ export const TaskItem: React.FunctionComponent<TaskProps> = ( { task, tasksAPI, 
     /** HANDLERS */
     function handleCompletedonClick(e: React.MouseEvent<HTMLButtonElement>):void {
         e.preventDefault();
-        const newTasks = tasks.map( (theTask) => {
-            if (theTask.id === task.id) {
-                theTask.completed = !theTask.completed;
-            }
-            return theTask;
-        });
-        setTasks(newTasks);
+        tasksAPI.updateTask(task.id, { completed: !task.completed });
     }
 
     function handleEditonClick(e: React.MouseEvent<HTMLButtonElement>):void {
         e.preventDefault();
         setIsEditing(task.taskText);
     }
-    
+
+    function handleDeleteonClick(e: React.MouseEvent<HTMLButtonElement>):void {
+        e.preventDefault();
+        let confirmDeletion = confirm("Are you sure?");
+        if (confirmDeletion)
+            tasksAPI.deleteTask(task.id);
+    }
+
     function handleSaveChangesAfterEditing(e: React.MouseEvent<HTMLButtonElement>):void {
         e.preventDefault();
-        const newTasks = tasks.map( (theTask) => {
-            if (theTask.taskText === task.taskText) {
-                theTask.taskText = isEditing.toString();
-            }
-            return theTask;
-        });
-        setTasks(newTasks);
+        tasksAPI.updateTask(task.id, { taskText: inputRef.current?.value });
         setIsEditing(false);
     }
 
@@ -56,17 +53,27 @@ export const TaskItem: React.FunctionComponent<TaskProps> = ( { task, tasksAPI, 
             inputRef?.current?.focus();
     }, [ isEditing ])
 
-
-    /** RENDER -----------JSX----------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** RENDER -----------JSX------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */
     if (!isEditing)
         return (  
             <li className={ styles.task_item +' '+ (task.completed? styles.task_item__completed : styles.task_item__todo )} >
                 
-                <span className='task-text'>{task.taskText}</span>
+                <span className='task-text' onClick={handleEditonClick} >{task.taskText}</span>
                 
                 <div className="icons">
                     <span onClick={handleEditonClick}><BsFillPencilFill  /></span>
-                    <span onClick={e=>tasksAPI.deleteTask(task.id)}><FcCancel  /></span>
+                    <span onClick={handleDeleteonClick}><FcCancel  /></span>
                     <span onClick={handleCompletedonClick}>{task.completed? <VscPassFilled  /> : <VscPass />}</span>
                 </div>
 
@@ -81,4 +88,5 @@ export const TaskItem: React.FunctionComponent<TaskProps> = ( { task, tasksAPI, 
 
             </li>);
 }
-
+    /** ---------------------------------------------------------------------------------------- */
+    /** ---------------------------------------------------------------------------------------- */

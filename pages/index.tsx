@@ -3,22 +3,25 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.scss';
 import {TaskItem} from '../components/TaskItem';
 import * as React from 'react';
+// Apollo related:
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 
 type Props = {
+  result: Object,
   tasksAPI: Object,
   tasks: TaskType[],
-  setTask: Function,
+  setTasks: Function,
 }
 
-const Home: NextPage<Props> = ( { tasksAPI, tasks, setTasks }) => {
-
+const Home: NextPage<Props> = ( { result, tasksAPI, tasks, setTasks }) => {
+  console.log('res', result);
   const [taskEdited, setTaskEdited] = React.useState<string>('');
 
   // add the edited task as a new task and clean the input
-  const handleSubmit = function(e: React.FormEvent<HTMLInputElement>) {
-    e.preventDefault();    
-    const numberOfTasks = tasks.length;
+  const handleSubmit = function(event: React.FormEvent<HTMLInputElement>) {
+    event.preventDefault();    
+
     tasksAPI.addNewTask({
       taskText: taskEdited,
       completed: false
@@ -57,5 +60,66 @@ const Home: NextPage<Props> = ( { tasksAPI, tasks, setTasks }) => {
     </div>
   )
 }
+
+// This function gets called at build time on server-side.
+// It may be called again, on a serverless function, if
+// revalidation is enabled and a new request comes in
+interface NodeType {
+  taskId: number,
+  content: string,
+  title: string,
+  acf: { completed: boolean }
+}
+
+
+// at this point I abandoned the project. Creating the Apoollo connection in typescript is a lot of work
+export async function todelete___getStaticProps() {
+  
+  /** >>>>>>>  A P O L L  O  <<<<<<<< */
+  const client = new ApolloClient({
+    uri:    'http://tasksgraphql.local/graphql/',
+    cache:  new InMemoryCache(),
+    connectToDevTools: true
+  });  
+
+
+  const result: { data: {tasks: { nodes: Array<NodeType> }} } = await client.query({
+    query: gql`
+      query AllTasks {
+        tasks {
+          nodes {
+            taskId
+            content
+            title
+          }
+        }
+      }
+    `
+  });
+
+
+  const tasks = result.data.tasks.nodes.map( node => {
+    return {
+      id: node.taskId,
+      taskText: node.title,
+    }
+  } )
+
+  return {
+    props: {
+      result,
+    },
+    // Next.js will attempt to re-generate the page:
+    // - When a request comes in
+    // - At most once every 10 seconds
+    revalidate: 10, // In seconds
+  }
+}
+
+
+
+
+
+
 
 export default Home

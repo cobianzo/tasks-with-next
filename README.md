@@ -1,3 +1,10 @@
+The project works. 
+I abandoned the project at thje point of creating the Wordpress installation for the Graphl connection.
+Creating an apollo connection in typescript is a mess.
+
+
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
